@@ -2,32 +2,25 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'tomcat'
 apply plugin: 'eclipse'
+apply plugin: 'propdeps'
+apply plugin: 'propdeps-maven'
+apply plugin: 'propdeps-idea'
+apply plugin: 'propdeps-eclipse'
 
 group = 'TennisBooklet'
 version = '0.0.1-SNAPSHOT'
 
 description = """TennisBooklet"""
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
-
 buildscript {
     repositories {
         jcenter()
+        maven { url 'http://repo.spring.io/plugins-release' }
     }
 
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.2.4'
-    }
-}
-
-configurations {
-	provided
-}
-
-sourceSets {
-    main {
-        compileClasspath += configurations.provided
+        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
     }
 }
 
@@ -35,6 +28,7 @@ repositories {
      mavenCentral()
      maven { url "https://oss.sonatype.org/content/repositories/springsource-milestones" }
      maven { url "http://repo.maven.apache.org/maven2" }
+     
 }
 
 dependencies {
@@ -47,7 +41,6 @@ dependencies {
     compile(group: 'org.springframework.data', name: 'spring-data-jpa', version:'1.6.0.RELEASE') {
 		exclude(module: 'spring-asm')
     }
-    provided group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
     compile group: 'jstl', name: 'jstl', version:'1.2'
     def tomcatVersion = '7.0.47'
     tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
@@ -55,4 +48,5 @@ dependencies {
     tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
         exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
 	}
+	provided group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 }
