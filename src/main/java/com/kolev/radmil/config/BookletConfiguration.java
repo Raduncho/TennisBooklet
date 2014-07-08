@@ -26,7 +26,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @ComponentScan(basePackages = "com.kolev.radmil")
 @EnableWebMvc
 @EnableTransactionManagement
-@PropertySource("classpath:application.properties")
+@PropertySource("classpath:hsql.properties")
 @EnableJpaRepositories("com.kolev.radmil.repository")
 public class BookletConfiguration extends WebMvcConfigurerAdapter {
 
