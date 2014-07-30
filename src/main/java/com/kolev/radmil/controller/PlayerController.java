@@ -2,9 +2,13 @@ package com.kolev.radmil.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,12 +30,20 @@ public class PlayerController {
 
 	@RequestMapping(value = "/newPlayer", method = RequestMethod.GET)
 	public ModelAndView playerForm() {
-		return new ModelAndView("newPlayer", "command", new Player());
+		return new ModelAndView("newPlayer", "player", new Player());
 	}
 
 	@RequestMapping(value = "/newPlayer", method = RequestMethod.POST)
-	public String playerSubmit(@ModelAttribute Player player, Model model) {
-		service.addPlayer(player);
+	public String playerSubmit(@Valid Player player, BindingResult result, Model model) {
+		if (result.hasErrors()) {
+			return "newPlayer";
+		}
+		try {
+			service.addPlayer(player);
+		} catch (JpaSystemException jse) {
+			model.addAttribute("player", player);
+			return "newPlayer";
+		}
 		model.addAttribute("player", player);
 		return "newResult";
 	}
@@ -55,4 +67,5 @@ public class PlayerController {
 		model.addAttribute("playersList", allPlayers);
 		return "showPlayers";
 	}
+
 }

@@ -25,14 +25,16 @@ public class PlayerService {
 		repository.delete(cardId);
 	}
 
-	@Transactional
 	public Player getPlayer(int cardId) {
 		return repository.findOne(cardId);
 	}
 
-	@Transactional
-	public List getAllPlayers() {
+	public List<Player> getAllPlayers() {
 		return repository.findAll();
+	}
+
+	public Player getPlayerByName(String playerName) {
+		return repository.findByNameLike(playerName);
 	}
 
 }
