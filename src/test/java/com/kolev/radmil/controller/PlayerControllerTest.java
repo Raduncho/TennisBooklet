@@ -50,20 +50,9 @@ public class PlayerControllerTest {
 
 	private MockMvc mockMvc;
 
-	@Mock
-	private BindingResult result;
-
 	@Before
 	public void setup() {
 		mockMvc = MockMvcBuilders.standaloneSetup(playerController).setViewResolvers(viewResolver()).build();
-		Mockito.when(playerRepository.save(any(Player.class))).thenAnswer(new Answer<Player>() {
-
-			@Override
-			public Player answer(InvocationOnMock invocation) throws Throwable {
-				Player player = (Player) invocation.getArguments()[0];
-				return player;
-			}
-		});
 	}
 
 	private InternalResourceViewResolver viewResolver() {
@@ -147,7 +136,7 @@ public class PlayerControllerTest {
 	@Test
 	public void testPostDelPlayerSuccessful() throws Exception {
 		Mockito.when(playerRepository.findByNameLike(anyString())).thenReturn(new Player());
-		mockMvc.perform(post("/delPlayer"))
+		mockMvc.perform(post("/delPlayer").param("name", "Roger"))
 		.andExpect(status().isOk())
 		.andExpect(view().name("delResult"))
 		.andExpect(model().attributeExists("player"))
@@ -157,7 +146,7 @@ public class PlayerControllerTest {
 	@Test
 	public void testPostDelPlayerNull() throws Exception {
 		Mockito.when(playerRepository.findByNameLike(anyString())).thenReturn(null);
-		mockMvc.perform(post("/delPlayer"))
+		mockMvc.perform(post("/delPlayer").param("name", "Roger"))
 		.andExpect(status().isOk())
 		.andExpect(view().name("pnf"))
 		.andExpect(model().attributeExists("player"))
@@ -176,11 +165,10 @@ public class PlayerControllerTest {
 	@Test
 	public void testPostNewPlayerThrownException() throws Exception {
 		Mockito.when(playerRepository.save(any(Player.class))).thenThrow(new JpaSystemException(new PersistenceException()));
-		mockMvc.perform(post("/newPlayer").param("name", "Roger"))
+		mockMvc.perform(post("/newPlayer"))
 		.andExpect(status().isOk())
 		.andExpect(view().name("newPlayer"))
 		.andExpect(model().attributeExists("player"))
-		.andExpect(model().attribute("player", hasProperty("name", is("Roger"))))
 		.andExpect(model().size(1));
 	}
 
