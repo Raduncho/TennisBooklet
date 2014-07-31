@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.kolev.radmil.entity.Player;
-import com.kolev.radmil.service.PlayerService;
+import com.kolev.radmil.repository.PlayerRepository;
 
 @Controller
 public class PlayerController {
 
 	@Autowired
-	private PlayerService service;
+	private PlayerRepository playerRepository;
 
 	@RequestMapping(value = "/")
 	public ModelAndView home() {
@@ -39,7 +39,7 @@ public class PlayerController {
 			return "newPlayer";
 		}
 		try {
-			service.addPlayer(player);
+			playerRepository.save(player);
 		} catch (JpaSystemException jse) {
 			model.addAttribute("player", player);
 			return "newPlayer";
@@ -47,23 +47,30 @@ public class PlayerController {
 		model.addAttribute("player", player);
 		return "newResult";
 	}
-	
+
 	@RequestMapping(value = "/delPlayer", method = RequestMethod.GET)
 	public ModelAndView delPlayerForm() {
-		return new ModelAndView("delPlayer", "command", new Player());
+		return new ModelAndView("delPlayer", "player", new Player());
 	}
 
 	@RequestMapping(value = "/delPlayer", method = RequestMethod.POST)
-	public String delPlayerSubmit(@ModelAttribute Player player, Model model) {
-		Player searchedPlayer = service.getPlayer(player.getCardId());
-		service.removePlayer(player.getCardId());
+	public String delPlayerSubmit(@Valid Player player, BindingResult result, Model model) {
+		if (result.hasFieldErrors("name")) {
+			return "delPlayer";
+		}
+		Player searchedPlayer = playerRepository.findByNameLike(player.getName());
+		if (searchedPlayer == null) {
+			model.addAttribute("player", player);
+			return "pnf";
+		}
+		playerRepository.delete(searchedPlayer.getCardId());
 		model.addAttribute("player", searchedPlayer);
 		return "delResult";
 	}
 
 	@RequestMapping(value = "/showPlayers")
 	public String showPlayers(Model model) {
-		List<Player> allPlayers= service.getAllPlayers();
+		List<Player> allPlayers = playerRepository.findAll();
 		model.addAttribute("playersList", allPlayers);
 		return "showPlayers";
 	}

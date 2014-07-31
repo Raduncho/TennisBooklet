@@ -21,27 +21,27 @@
 				</tr>
 			</thead>
 			<tbody>				
-			<c:forEach items="${gamesList}" var="gameWrapper">
+			<c:forEach items="${gamesList}" var="game">
 				<tr>
-					<td><c:out value="${gameWrapper.player1.name}"/></td>
-					<td><c:out value="${gameWrapper.player2.name}"/></td>
+					<td><c:out value="${game.player1.name}"/></td>
+					<td><c:out value="${game.player2.name}"/></td>
 					<td>
 						<c:choose>
-							<c:when test="${fn:length(gameWrapper.sets) gt 4}">
+							<c:when test="${fn:length(game.sets) gt 4}">
 								<c:forEach var="i" begin="0" end="2">
-									<c:out value="${gameWrapper.sets[i].gamesWon}"></c:out>:<c:out value="${gameWrapper.sets[i+3].gamesWon}"></c:out>
+									<c:out value="${game.sets[i].gamesWon}"></c:out>:<c:out value="${game.sets[i+3].gamesWon}"></c:out>
 								</c:forEach>						
 							</c:when>
 							<c:otherwise>
 								<c:forEach var="i" begin="0" end="1">
-									<c:out value="${gameWrapper.sets[i].gamesWon}"></c:out>:<c:out value="${gameWrapper.sets[i+2].gamesWon}"></c:out>
+									<c:out value="${game.sets[i].gamesWon}"></c:out>:<c:out value="${game.sets[i+2].gamesWon}"></c:out>
 								</c:forEach>							
 							</c:otherwise>						
 						</c:choose>
 						
 					</td>
 					<td>
-					<fmt:formatDate value="${gameWrapper.date}" pattern="dd-MM-yyyy"/>
+					<fmt:formatDate value="${game.date}" pattern="dd-MM-yyyy"/>
 					</td>
 				</tr>
 			</c:forEach>

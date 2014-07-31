@@ -6,7 +6,7 @@
 		<title>Add New Match</title>
 	</head>
 	<body>
-		<form:form modelAttribute="gameWrapper" method="POST">
+		<form:form modelAttribute="game" method="POST">
 			<table style="text-align:left">
 				<thead>
 					<tr>

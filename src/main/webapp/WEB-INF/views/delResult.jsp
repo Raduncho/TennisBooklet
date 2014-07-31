@@ -4,7 +4,7 @@
 		<title>Success</title>
 	</head>
 	<body>
-		<p>Player ${player.name} with card id ${player.cardId} has been deleted from the database!</p>
+		<p>Player ${player.name} has been deleted from the database!</p>
 		<p></p>
 		<p><a href="${pageContext.servletContext.contextPath}">Home</a>
 	</body>

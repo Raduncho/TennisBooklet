@@ -1,6 +1,5 @@
 package com.kolev.radmil.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,36 +13,33 @@ import org.springframework.web.servlet.ModelAndView;
 import com.kolev.radmil.entity.Game;
 import com.kolev.radmil.entity.Player;
 import com.kolev.radmil.entity.Set;
-import com.kolev.radmil.form.GameWrapper;
+import com.kolev.radmil.repository.GameRepository;
+import com.kolev.radmil.repository.PlayerRepository;
+import com.kolev.radmil.repository.SetRepository;
 import com.kolev.radmil.service.GameService;
-import com.kolev.radmil.service.PlayerService;
-import com.kolev.radmil.service.SetService;
 
 @Controller
 public class GameController {
 
 	@Autowired
-	private PlayerService playerService;
+	private PlayerRepository playerRepository;
+
+	@Autowired
+	private GameRepository gameRepository;
+
+	@Autowired
+	private SetRepository setRepository;
 
 	@Autowired
 	private GameService gameService;
 
-	@Autowired
-	private SetService setService;
-
 	@RequestMapping(value = "/showAllGames")
 	public String showAllGames(Model model) {
-		List<GameWrapper> gamesWrappers = new ArrayList<GameWrapper>();
-		List<Game> games = gameService.getAllGames();
+		List<Game> games = gameRepository.findAll();
 		for (Game game : games) {
-			GameWrapper gameWrapper = new GameWrapper();
-			gameWrapper.setPlayer1(game.getPlayer1());
-			gameWrapper.setPlayer2(game.getPlayer2());
-			gameWrapper.setDate(game.getDate());
-			gameWrapper.setSets(game.getSets());
-			gamesWrappers.add(gameWrapper);
+			game.setSets(setRepository.findBygameLike(game));
 		}
-		model.addAttribute("gamesList", gamesWrappers);
+		model.addAttribute("gamesList", games);
 		return "showAllGames";
 	}
 
@@ -54,44 +50,37 @@ public class GameController {
 
 	@RequestMapping(value = "/showPlayerGames", method = RequestMethod.POST)
 	public String showPlayerGamesSubmit(@ModelAttribute Player player, Model model) {
-		Player searchedPlayer = playerService.getPlayerByName(player.getName());
+		Player searchedPlayer = playerRepository.findByNameLike(player.getName());
 		if (searchedPlayer == null) {
 			model.addAttribute("player", player);
 			return "pnf";
 		}
-		List<GameWrapper> allPlayerGames = new ArrayList<GameWrapper>();
-		List<Game> games = gameService.getGamesByPlayer(searchedPlayer);
+		List<Game> games = gameRepository.findByPlayer1OrPlayer2(searchedPlayer, searchedPlayer);
 		for (Game game : games) {
-			GameWrapper gameWrapper = new GameWrapper();
-			gameWrapper.setDate(game.getDate());
-			gameWrapper.setSets(setService.getSetsByGame(game));
-			if (game.getPlayer1().getCardId() == searchedPlayer.getCardId()) {
-				gameWrapper.setPlayer1(game.getPlayer1());
-				gameWrapper.setPlayer2(game.getPlayer2());
-			} else {
-				gameWrapper.setPlayer1(game.getPlayer2());
-				gameWrapper.setPlayer2(game.getPlayer1());
-				List<Set> sets = gameWrapper.getSets();
+			game.setSets(setRepository.findBygameLike(game));
+			if (game.getPlayer1().getCardId() != searchedPlayer.getCardId()) {
+				game.setPlayer2(game.getPlayer1());
+				game.setPlayer1(searchedPlayer);
+				List<Set> sets = game.getSets();
 				for (int i = 0; i < sets.size() / 2; i++) {
 					sets.add(0, sets.get(sets.size() - 1));
 					sets.remove(sets.size() - 1);
 				}
 			}
-			allPlayerGames.add(gameWrapper);
 		}
-		model.addAttribute("gamesList", allPlayerGames);
+		model.addAttribute("gamesList", games);
 		return "showAllGames";
 	}
 
 	@RequestMapping(value = "/newGame", method = RequestMethod.GET)
 	public ModelAndView gameForm() {
-		return new ModelAndView("newGame", "gameWrapper", new GameWrapper());
+		return new ModelAndView("newGame", "game", new Game());
 	}
 
 	@RequestMapping(value = "/newGame", method = RequestMethod.POST)
-	public String gameSubmit(@ModelAttribute GameWrapper gameWrapper, Model model) {
-		Player player1 = playerService.getPlayer(gameWrapper.getPlayer1().getCardId());
-		Player player2 = playerService.getPlayer(gameWrapper.getPlayer2().getCardId());
+	public String gameSubmit(@ModelAttribute Game game, Model model) {
+		Player player1 = playerRepository.findOne(game.getPlayer1().getCardId());
+		Player player2 = playerRepository.findOne(game.getPlayer2().getCardId());
 		if (player1 == null) {
 			model.addAttribute("player", player1);
 			return "pnf";
@@ -100,10 +89,10 @@ public class GameController {
 			model.addAttribute("player", player2);
 			return "pnf";
 		}
-		gameWrapper.setPlayer1(player1);
-		gameWrapper.setPlayer2(player2);
-		gameService.addGame(new Game(), gameWrapper);
-		model.addAttribute("gameWrapper", gameWrapper);
+		game.setPlayer1(player1);
+		game.setPlayer2(player2);
+		gameService.addGame(game);
+		model.addAttribute("game", game);
 		return "newGameResult";
 	}
 }

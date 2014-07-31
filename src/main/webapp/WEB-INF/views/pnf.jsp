@@ -6,6 +6,6 @@
 	<body>
 		<p>Player ${player.name} cannot be found in the database!</p>
 		<p></p>
-		<p><a href="${pageContext.servletContext.contextPath}/showPlayerGames">Back</a>
+		<p><a href="${pageContext.servletContext.contextPath}">Home</a>
 	</body>
 </html>
